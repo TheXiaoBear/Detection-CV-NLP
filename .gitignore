@@ -1,0 +1,7 @@
+.idea/
+__pycache__/
+*.pyc
+.env
+venv/
+nlp-service/app/weights/
+cv-service/app/weights/

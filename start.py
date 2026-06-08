@@ -1,0 +1,140 @@
+import subprocess
+import sys
+import os
+import threading
+import time
+import signal
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+processes = []
+
+
+def run_service(name, cwd, command, color_code, delay=0):
+    """运行服务并实时打印带颜色前缀的日志"""
+    prefix = f"\033[{color_code}m[{name}]\033[0m"
+
+    if delay > 0:
+        print(f"{prefix} 等待 {delay} 秒后启动...")
+        time.sleep(delay)
+
+    print(f"{prefix} 启动中... | 目录: {cwd}")
+    print(f"{prefix} 命令: {command}")
+
+    process = subprocess.Popen(
+        command,
+        cwd=cwd,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+        encoding='utf-8'
+    )
+    processes.append(process)
+
+    for line in iter(process.stdout.readline, ''):
+        if line:
+            print(f"{prefix} {line}", end='')
+
+    process.stdout.close()
+    return_code = process.wait()
+    print(f"{prefix} 服务已退出，返回码: {return_code}")
+
+
+def cleanup(signum=None, frame=None):
+    print("\n\033[31m👋 正在停止所有服务...\033[0m")
+    for p in processes:
+        try:
+            p.terminate()
+            p.wait(timeout=2)
+        except:
+            p.kill()
+    sys.exit(0)
+
+
+def main():
+    signal.signal(signal.SIGINT, cleanup)
+
+    print("=" * 60)
+    print("🚀 正在启动 5 个服务...")
+    print("=" * 60)
+
+    # ==========================================
+    # 服务配置
+    # ==========================================
+    services = [
+        # 第1批：先启动所有 web 服务 (run.py)
+        {
+            "name": "user-web",
+            "cwd": os.path.join(BASE_DIR, "user-service"),
+            "cmd": "python run.py",
+            "color": "32",  # 绿色
+            "delay": 0
+        },
+        {
+            "name": "cv-web",
+            "cwd": os.path.join(BASE_DIR, "cv-service"),
+            "cmd": "python run.py",
+            "color": "34",  # 蓝色
+            "delay": 2  # 间隔2秒
+        },
+        {
+            "name": "nlp-web",
+            "cwd": os.path.join(BASE_DIR, "nlp-service"),
+            "cmd": "python run.py",
+            "color": "36",  # 青色
+            "delay": 4  # 间隔2秒
+        },
+        # 第2批：再启动 worker（依赖 web 服务就绪）
+        {
+            "name": "cv-worker",
+            "cwd": os.path.join(BASE_DIR, "cv-service"),
+            "cmd": "python -m cv_app.run_worker",
+            "color": "94",  # 亮蓝色
+            "delay": 8  # 等 web 服务先启动
+        },
+        {
+            "name": "nlp-worker",
+            "cwd": os.path.join(BASE_DIR, "nlp-service"),
+            "cmd": "python -m nlp_app.run_worker",
+            "color": "95",  # 亮紫色
+            "delay": 10  # 等 web 服务先启动
+        },
+    ]
+
+    threads = []
+    for svc in services:
+        if not os.path.exists(svc["cwd"]):
+            print(f"\033[31m[错误] 目录不存在: {svc['cwd']}\033[0m")
+            continue
+
+        t = threading.Thread(
+            target=run_service,
+            args=(svc["name"], svc["cwd"], svc["cmd"], svc["color"], svc["delay"])
+        )
+        t.daemon = True
+        t.start()
+        threads.append(t)
+
+    # 打印服务状态
+    time.sleep(2)
+    print("\n" + "=" * 60)
+    print("✅ 所有服务启动中...")
+    print("=" * 60)
+    print("   • user-web   : http://localhost:8000")
+    print("   • cv-web     : http://localhost:8001")
+    print("   • nlp-web    : http://localhost:8002")
+    print("   • cv-worker  : RabbitMQ 消费者")
+    print("   • nlp-worker : RabbitMQ 消费者")
+    print("=" * 60)
+    print("\n💡 按 Ctrl+C 可停止所有服务\n")
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        cleanup()
+
+
+if __name__ == "__main__":
+    main()

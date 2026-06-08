@@ -1,19 +1,3 @@
-api：接收请求  
-schemas：定义数据  
-services：处理逻辑  
-repository：操作数据库  
-models：定义表  
-db：提供连接  
-main：启动项目
-
-id
-task_id
-label
-confidence
-caption
-bbox_image_path
-heatmap_path
-created_at
 
 ## 二、数据库引擎 Engine：管道的"总阀门"
 
@@ -154,17 +138,45 @@ def get_db():
 
 ### 这是整个文件**与 FastAPI 衔接最关键**的部分。
 
-status：
+⭐ 1. 用户操作日志（建议做！）
 
-pending
-processing
-success
-failed
+是的，需要一张表：
 
-                                                                                                                  
-                                                                                                                
-cv-service                                                                                                               
-mq                                                                                                                       
-nlp-service                                                                                                              
-user-sevice                                                                                                              
+user_log
+
+字段建议：
+
+id
+user_id
+action（登录 / 修改头像 / 修改信息 / 删除任务）
+ip
+created_at
+
+👉 用途：
+
+审计
+安全记录
+答辩加分点（很重要）                                                                                                       
                                                                                                      
+python cv-service/app/weights/download.py
+
+TargetDetection\nlp-service  python -m nlp_app.run_worker    
+TargetDetection\cv-service   python -m cv_app.run_worker
+if __name__ == "__main__":
+
+    start_worker()
+
+python run.py  
+import uvicorn
+
+if __name__ == "__main__":
+    uvicorn.run(
+        "user_app.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True
+    )
+
+TargetDetection\user-service port=8000
+TargetDetection\cv-service port=8001
+TargetDetection\nlp-service port=8002

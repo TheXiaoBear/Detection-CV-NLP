@@ -3,5 +3,5 @@ __pycache__/
 *.pyc
 .env
 venv/
-nlp-service/app/weights/
-cv-service/app/weights/
+nlp-service/nlp_app/weights/
+cv-service/cv_app/weights/

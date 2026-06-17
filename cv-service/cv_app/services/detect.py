@@ -6,6 +6,7 @@ from cv_app.utils.oss import upload_file
 from cv_app.utils.heatmap import generate_heatmap
 import requests
 import numpy as np
+import time
 
 import cv2
 import uuid
@@ -38,6 +39,7 @@ def detection(
     # =========================
     # 3. 模型推理
     # =========================
+
     response = requests.get(image_path)
 
     image_array = np.asarray(
@@ -50,7 +52,10 @@ def detection(
         cv2.IMREAD_COLOR
     )
 
+    start_time = time.perf_counter()
     results = model(image, save=False)
+    end_time = time.perf_counter()
+    duration = end_time - start_time  # 单位：秒(float)
 
     result_list = []
 
@@ -86,7 +91,10 @@ def detection(
     # =========================
     # 5. 生成 bbox 图片
     # =========================
-    bbox_image = results[0].plot()
+    if len(results) == 0:
+        bbox_image = image
+    else:
+        bbox_image = results[0].plot()
 
     bbox_filename = f"{uuid.uuid4()}.jpg"
 
@@ -104,7 +112,7 @@ def detection(
     # 6. 热力图（后面加）
     # =========================
     # 下载原图到内存
-    response = requests.get(image_path)
+
     original_image = image
     # image_array = np.asarray(
     #     bytearray(response.content),
@@ -142,6 +150,7 @@ def detection(
 
     task.status = "CV_success"
     task.cv_model = model_name
+    task.cv_duration = round(duration, 4)
 
     # =========================
     # 8. 写入 result

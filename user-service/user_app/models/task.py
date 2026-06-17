@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, Text, Float
 from user_app.db.database import Base
 from user_app.models.mixins import TimestampMixin
 from sqlalchemy.orm import relationship
@@ -18,6 +18,8 @@ class Task(Base, TimestampMixin):
 
     description = Column(Text)
 
+    confidence = Column(Float)
+
     status = Column(String(50), index=True, nullable=False)
 
     bbox_image = Column(String(500))
@@ -25,7 +27,9 @@ class Task(Base, TimestampMixin):
     heatmap_image = Column(String(500))
 
     cv_model = Column(String(50))
+    cv_duration = Column(Float)
     nlp_model = Column(String(50))
+    nlp_duration = Column(Float)
 
     user = relationship("User",
                         back_populates="tasks")

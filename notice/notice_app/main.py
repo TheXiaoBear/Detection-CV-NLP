@@ -2,11 +2,11 @@ import asyncio # Python自带的"异步任务调度器"
 from fastapi import FastAPI, HTTPException # FastAPI本体 + 内置的HTTP异常类
 from contextlib import asynccontextmanager # 把异步函数变成"上下文管理器"的工具
 
-from favorite_app.db.database import Base, engine # 数据库的"图纸(Base)"和"发动机(engine)"
+from notice_app.db.database import Base, engine # 数据库的"图纸(Base)"和"发动机(engine)"
 
 from fastapi.middleware.cors import CORSMiddleware
 
-from favorite_app.utils.exception import (
+from notice_app.utils.exception import (
     http_exception_handler,
     global_exception_handler
 )

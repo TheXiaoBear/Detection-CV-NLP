@@ -63,42 +63,77 @@ def main():
     # 服务配置
     # ==========================================
     services = [
-        # 第1批：先启动所有 web 服务 (run.py)
+
+        # ======================
+        # Gateway（统一入口）
+        # ======================
+        {
+            "name": "gateway",
+            "cwd": BASE_DIR,
+            "cmd": "uvicorn gateway.gateway:app --host 127.0.0.1 --port 8080 --reload",
+            "color": "31",
+            "delay": 0
+        },
+
+        # ======================
+        # Web 服务
+        # ======================
         {
             "name": "user-web",
             "cwd": os.path.join(BASE_DIR, "user-service"),
             "cmd": "python run.py",
-            "color": "32",  # 绿色
-            "delay": 0
+            "color": "32",
+            "delay": 1
         },
         {
             "name": "cv-web",
             "cwd": os.path.join(BASE_DIR, "cv-service"),
             "cmd": "python run.py",
-            "color": "34",  # 蓝色
-            "delay": 2  # 间隔2秒
+            "color": "34",
+            "delay": 2
         },
         {
             "name": "nlp-web",
             "cwd": os.path.join(BASE_DIR, "nlp-service"),
             "cmd": "python run.py",
-            "color": "36",  # 青色
-            "delay": 4  # 间隔2秒
+            "color": "36",
+            "delay": 3
         },
-        # 第2批：再启动 worker（依赖 web 服务就绪）
+
+        # ======================
+        # 业务服务
+        # ======================
+        {
+            "name": "favorite",
+            "cwd": os.path.join(BASE_DIR, "favorite"),
+            "cmd": "python run.py",
+            "color": "33",
+            "delay": 4
+        },
+        {
+            "name": "notice",
+            "cwd": os.path.join(BASE_DIR, "notice"),
+            "cmd": "python run.py",
+            "color": "35",
+            "delay": 5
+        },
+
+        # ======================
+        # workers
+        # ======================
         {
             "name": "cv-worker",
             "cwd": os.path.join(BASE_DIR, "cv-service"),
             "cmd": "python -m cv_app.run_worker",
-            "color": "94",  # 亮蓝色
-            "delay": 8  # 等 web 服务先启动
+            "color": "94",
+            "delay": 6
         },
         {
             "name": "nlp-worker",
             "cwd": os.path.join(BASE_DIR, "nlp-service"),
             "cmd": "python -m nlp_app.run_worker",
-            "color": "95",  # 亮紫色
-            "delay": 10  # 等 web 服务先启动
+            "color": "95",
+            "delay": 7
         },
     ]
 
@@ -124,6 +159,8 @@ def main():
     print("   • user-web   : http://localhost:8000")
     print("   • cv-web     : http://localhost:8001")
     print("   • nlp-web    : http://localhost:8002")
+    print("   • favorite    : http://localhost:8003")
+    print("   • notice    : http://localhost:8004")
     print("   • cv-worker  : RabbitMQ 消费者")
     print("   • nlp-worker : RabbitMQ 消费者")
     print("=" * 60)

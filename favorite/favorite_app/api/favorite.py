@@ -14,12 +14,12 @@ import favorite_app.service.favorite as favorite_service
 router = APIRouter()
 
 # 添加收藏
-@router.post("/favorite/add", response_model=FavoriteResponse)
+@router.post("/add", response_model=FavoriteResponse)
 def favorite_add(favorite: FavoriteCreate, db: Session = Depends(get_db)):
     return ResponseUtil.success(favorite_service.favorite_add(db, favorite))
 
 # 搜索收藏内容
-@router.get("/favorite/list")
+@router.get("/list")
 def favorite_list(
     db: Session = Depends(get_db),
     current_user = Depends(get_current_user),
@@ -38,7 +38,7 @@ def favorite_list(
     return ResponseUtil.success(data)
 
 # 取消收藏
-@router.put("/favorite/cancel", response_model=FavoriteResponse)
+@router.put("/cancel", response_model=FavoriteResponse)
 def favorite_cancel(task_id: int, db: Session = Depends(get_db),
                     current_user = Depends(get_current_user),
                     ):

@@ -7,6 +7,9 @@ from datetime import datetime, UTC
 
 def create(db: Session, task: Task):
     db.add(task)
+    db.commit()
+    db.refresh(task)
+    return task
     return task
 
 

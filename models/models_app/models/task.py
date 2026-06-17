@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, Text, Float
-from nlp_app.db.database import Base
-from nlp_app.models.mixins import TimestampMixin
+from sqlalchemy import Column, Integer, String, ForeignKey, Text, Float
+from user_app.db.database import Base
+from user_app.models.mixins import TimestampMixin
 from sqlalchemy.orm import relationship
 
 
@@ -10,7 +10,7 @@ class Task(Base, TimestampMixin):
     id = Column(Integer, primary_key=True, index=True)
 
     # 多对一 -> user
-    user_id = Column(Integer, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
 
     title = Column(String(50))
 
@@ -26,12 +26,16 @@ class Task(Base, TimestampMixin):
     heatmap_image = Column(String(500))
 
     cv_model = Column(String(50))
-    cv_duration = Column(Float)
     nlp_model = Column(String(50))
-    nlp_duration = Column(Float)
+
+    user = relationship("User",
+                        back_populates="tasks")
 
     # 一对多 -> result
-    results = relationship(
-        "Result",
+    results = relationship("Result",
+                           back_populates="task")
+
+    favorites = relationship(
+        "Favorite",
         back_populates="task"
     )

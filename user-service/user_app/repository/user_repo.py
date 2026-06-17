@@ -5,6 +5,8 @@ from datetime import datetime, UTC
 # 新建用户
 def create(db: Session, user: User):
     db.add(user)
+    db.commit()
+    db.refresh(user)
     return user
 
 # 用id只查用户信息

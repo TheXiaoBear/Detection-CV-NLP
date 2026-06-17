@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 
-from notice_app.db.database import get_db
-from notice_app.schemas.favorite import FavoriteCreate, FavoriteResponse, Favorite_to_Task
-from notice_app.utils.auth import require_admin, get_current_user
-from notice_app.utils.security import verify_password
-from notice_app.utils.jwt import create_access_token
-from notice_app.utils.response import ResponseUtil
-from notice_app.utils.page import PageMethod
-from notice_app.core.redis_client import redis_client
+from favorite_app.db.database import get_db
+from favorite_app.schemas.favorite import FavoriteCreate, FavoriteResponse, Favorite_to_Task
+from favorite_app.utils.auth import require_admin, get_current_user
+from favorite_app.utils.security import verify_password
+from favorite_app.utils.jwt import create_access_token
+from favorite_app.utils.response import ResponseUtil
+from favorite_app.utils.page import PageMethod
+from favorite_app.core.redis_client import redis_client
 from typing import Optional, List
 import favorite_app.service.favorite as favorite_service
 router = APIRouter()

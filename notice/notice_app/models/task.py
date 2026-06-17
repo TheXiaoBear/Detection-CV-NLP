@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, Text, Float
 from notice_app.db.database import Base
 from notice_app.models.mixins import TimestampMixin
 from sqlalchemy.orm import relationship
@@ -17,6 +17,7 @@ class Task(Base, TimestampMixin):
     image_path = Column(String(255))
 
     description = Column(Text)
+    confidence = Column(Float)
 
     status = Column(String(50), index=True, nullable=False)
 

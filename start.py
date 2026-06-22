@@ -10,7 +10,7 @@ processes = []
 
 
 def run_service(name, cwd, command, color_code, delay=0):
-    """运行服务并实时打印带颜色前缀的日志"""
+    """运行服务，保持 TTY 以支持热重载，同时添加颜色前缀"""
     prefix = f"\033[{color_code}m[{name}]\033[0m"
 
     if delay > 0:
@@ -20,6 +20,19 @@ def run_service(name, cwd, command, color_code, delay=0):
     print(f"{prefix} 启动中... | 目录: {cwd}")
     print(f"{prefix} 命令: {command}")
 
+    # 方案A：直接启动，不捕获输出（保留 TTY，热重载正常）
+    # 但无法添加颜色前缀
+    # process = subprocess.Popen(command, cwd=cwd, shell=True)
+
+    # 方案B：使用伪终端（Windows 需要特殊处理，较复杂）
+
+    # 方案C：捕获输出但修复编码，同时用环境变量强制 UTF-8
+    # 这是折中方案：热重载可能仍受限，但至少不会崩溃
+
+    # 强制子进程使用 UTF-8
+    env = os.environ.copy()
+    env["PYTHONIOENCODING"] = "utf-8"
+
     process = subprocess.Popen(
         command,
         cwd=cwd,
@@ -28,7 +41,9 @@ def run_service(name, cwd, command, color_code, delay=0):
         stderr=subprocess.STDOUT,
         text=True,
         bufsize=1,
-        encoding='utf-8'
+        encoding='utf-8',  # 尝试 UTF-8
+        errors='replace',  # 无法解码时用 � 替换，不崩溃
+        env=env
     )
     processes.append(process)
 
@@ -42,7 +57,7 @@ def run_service(name, cwd, command, color_code, delay=0):
 
 
 def cleanup(signum=None, frame=None):
-    print("\n\033[31m👋 正在停止所有服务...\033[0m")
+    print("\n\033[31m 正在停止所有服务...\033[0m")
     for p in processes:
         try:
             p.terminate()
@@ -56,17 +71,10 @@ def main():
     signal.signal(signal.SIGINT, cleanup)
 
     print("=" * 60)
-    print("🚀 正在启动 5 个服务...")
+    print(" 正在启动服务...")
     print("=" * 60)
 
-    # ==========================================
-    # 服务配置
-    # ==========================================
     services = [
-
-        # ======================
-        # Gateway（统一入口）
-        # ======================
         {
             "name": "gateway",
             "cwd": BASE_DIR,
@@ -74,10 +82,6 @@ def main():
             "color": "31",
             "delay": 0
         },
-
-        # ======================
-        # Web 服务
-        # ======================
         {
             "name": "user-web",
             "cwd": os.path.join(BASE_DIR, "user-service"),
@@ -99,41 +103,40 @@ def main():
             "color": "36",
             "delay": 3
         },
-
-        # ======================
-        # 业务服务
-        # ======================
+        {
+            "name": "llm",
+            "cwd": os.path.join(BASE_DIR, "llm-service"),
+            "cmd": "python run.py",
+            "color": "36",
+            "delay": 4
+        },
         {
             "name": "favorite",
             "cwd": os.path.join(BASE_DIR, "favorite"),
             "cmd": "python run.py",
             "color": "33",
-            "delay": 4
+            "delay": 5
         },
         {
             "name": "notice",
             "cwd": os.path.join(BASE_DIR, "notice"),
             "cmd": "python run.py",
             "color": "35",
-            "delay": 5
+            "delay": 6
         },
-
-        # ======================
-        # workers
-        # ======================
         {
             "name": "cv-worker",
             "cwd": os.path.join(BASE_DIR, "cv-service"),
             "cmd": "python -m cv_app.run_worker",
             "color": "94",
-            "delay": 6
+            "delay": 7
         },
         {
             "name": "nlp-worker",
             "cwd": os.path.join(BASE_DIR, "nlp-service"),
             "cmd": "python -m nlp_app.run_worker",
             "color": "95",
-            "delay": 7
+            "delay": 8
         },
     ]
 
@@ -151,20 +154,20 @@ def main():
         t.start()
         threads.append(t)
 
-    # 打印服务状态
     time.sleep(2)
     print("\n" + "=" * 60)
-    print("✅ 所有服务启动中...")
+    print(" 所有服务启动中...")
     print("=" * 60)
+    print("   • gateway    : http://localhost:8080")
     print("   • user-web   : http://localhost:8000")
     print("   • cv-web     : http://localhost:8001")
     print("   • nlp-web    : http://localhost:8002")
-    print("   • favorite    : http://localhost:8003")
-    print("   • notice    : http://localhost:8004")
+    print("   • favorite   : http://localhost:8003")
+    print("   • notice     : http://localhost:8004")
     print("   • cv-worker  : RabbitMQ 消费者")
     print("   • nlp-worker : RabbitMQ 消费者")
     print("=" * 60)
-    print("\n💡 按 Ctrl+C 可停止所有服务\n")
+    print("\n 按 Ctrl+C 可停止所有服务\n")
 
     try:
         while True:

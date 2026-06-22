@@ -8,7 +8,7 @@ from notice_app.models.task import Task
 from datetime import datetime, UTC
 
 from notice_app.schemas.notice import NoticeCreate
-from models.user import User
+from notice_app.models.user import User
 
 def notice_add(db: Session, notice: NoticeCreate):
     user_name = db.query(User).filter(User.id == notice.user_id).first().username

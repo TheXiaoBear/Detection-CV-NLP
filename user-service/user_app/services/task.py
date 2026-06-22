@@ -54,10 +54,22 @@ def get_task(title, user_id, page_num, page_size, db: Session):
 
     total = query.count()
 
-    records = query.offset(skip).limit(page_size).all()
+    records = query.options(
+        joinedload(Task.favorites)
+    ).offset(skip).limit(page_size).all()
+
+    result = []
+    for task in records:
+        is_favorited = any(
+            fav.user_id == user_id for fav in task.favorites
+        )
+        result.append({
+            **task.__dict__,
+            "is_favorited": is_favorited
+        })
 
     return {
-        "records": records,
+        "records": result,
         "totalRow": total
     }
 

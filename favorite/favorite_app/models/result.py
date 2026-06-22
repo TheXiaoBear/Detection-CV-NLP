@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, Text
-from user_app.db.database import Base
-from user_app.models.mixins import TimestampMixin
+from favorite_app.db.database import Base
+from favorite_app.models.mixins import TimestampMixin
 from sqlalchemy.orm import relationship
 
 

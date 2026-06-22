@@ -37,3 +37,5 @@ class Task(Base, TimestampMixin):
     # 一对多 -> result
     results = relationship("Result",
                            back_populates="task")
+
+    favorites = relationship("Favorite", back_populates="task")

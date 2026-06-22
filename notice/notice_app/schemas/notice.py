@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field, EmailStr
-from favorite_app.schemas.task import TaskResponse
 
 class NoticeCreate(BaseModel):
     user_id: int

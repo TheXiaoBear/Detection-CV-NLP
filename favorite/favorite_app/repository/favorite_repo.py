@@ -6,13 +6,38 @@ from favorite_app.models.task import Task
 from datetime import datetime, UTC
 
 from favorite_app.schemas.favorite import FavoriteCreate
-from models.user import User
+from favorite_app.models.user import User
 
 
-def favorite_add(db: Session, favorite: FavoriteCreate):
+from favorite_app.models.favorite import Favorite
+
+def favorite_add(
+    db: Session,
+    user_id: int,
+    task_id: int
+):
+    exists = (
+        db.query(Favorite)
+        .filter(
+            Favorite.user_id == user_id,
+            Favorite.task_id == task_id
+        )
+        .first()
+    )
+
+    if exists:
+        raise HTTPException(
+            status_code=400,
+            detail="已收藏"
+        )
+
+    favorite = Favorite(
+        user_id=user_id,
+        task_id=task_id
+    )
+
     db.add(favorite)
     db.commit()
-
     db.refresh(favorite)
 
     return favorite
@@ -25,9 +50,8 @@ def favorite_search(
     page_size: int
 ):
     query = (
-        db.query(Favorite)
-        .join(Task, Favorite.task_id == Task.id)
-        .options(joinedload(Favorite.task))
+        db.query(Task)
+        .join(Favorite, Task.id == Favorite.task_id)
         .filter(Favorite.user_id == user_id)
     )
 
@@ -36,20 +60,29 @@ def favorite_search(
             Task.title.like(f"%{title.strip()}%")
         )
 
-    return (
+    total = query.count()
+
+    records = (
         query
         .offset(skip)
         .limit(page_size)
         .all()
     )
 
+    return {
+        "totalRow": total,
+        "records": records
+    }
+
 def favorite_cancel(db: Session, user_id: int, task_id: int):
-    result = db.query(Favorite).filter(Favorite.task_id == task_id).first()
-    if result:
-        raise HTTPException(status_code=404, detail="Favorite already canceled")
+    result = db.query(Favorite).filter(
+        Favorite.user_id == user_id,
+        Favorite.task_id == task_id
+    ).first()
+
+    if not result:
+        raise HTTPException(status_code=404, detail="Favorite not found")
 
     db.delete(result)
-
     db.commit()
-    db.refresh(result)
-    return result
+    return {"message": "取消收藏成功"}

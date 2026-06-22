@@ -9,8 +9,16 @@ from fastapi import HTTPException
 from favorite_app.utils.page import PageMethod
 
 # 新增收藏
-def favorite_add(db: Session, favorite: FavoriteCreate):
-    return favorite_repo.favorite_add(db, favorite)
+def favorite_add(
+    db: Session,
+    user_id: int,
+    task_id: int
+):
+    return favorite_repo.favorite_add(
+        db=db,
+        user_id=user_id,
+        task_id=task_id
+    )
 
 # 搜索或展示收藏
 def favorite_search(

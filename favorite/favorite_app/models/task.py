@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, Float
-from user_app.db.database import Base
-from user_app.models.mixins import TimestampMixin
+from favorite_app.db.database import Base
+from favorite_app.models.mixins import TimestampMixin
 from sqlalchemy.orm import relationship
 
 
@@ -37,7 +37,4 @@ class Task(Base, TimestampMixin):
     results = relationship("Result",
                            back_populates="task")
 
-    favorites = relationship(
-        "Favorite",
-        back_populates="task"
-    )
+    favorites = relationship("Favorite", back_populates="task")

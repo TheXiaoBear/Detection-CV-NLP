@@ -10,7 +10,6 @@ def create(db: Session, task: Task):
     db.commit()
     db.refresh(task)
     return task
-    return task
 
 
 def get_by_id(db: Session, user_id: int, skip=0, limit=10):

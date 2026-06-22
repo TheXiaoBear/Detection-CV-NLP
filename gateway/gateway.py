@@ -30,7 +30,7 @@ SERVICES = {
     "favorite": "http://127.0.0.1:8004",
     "notice": "http://127.0.0.1:8005",
     "models": "http://127.0.0.1:8006",
-    "llm": "http://127.0.0.1:8007",
+    "llm": "http://127.0.0.1:8003",
 }
 
 # =========================
@@ -72,6 +72,7 @@ async def proxy(service: str, path: str, request: Request):
     if service not in SERVICES:
         raise HTTPException(status_code=404)
 
+    # 前缀只作为识别，不作为url的一部分
     target_url = f"{SERVICES[service]}/{path}"
     print("target_url:", target_url)
 

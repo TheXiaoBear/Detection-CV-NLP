@@ -17,3 +17,5 @@ class Favorite(Base, TimestampMixin):
         "Task",
         back_populates="favorites"
     )
+
+    user = relationship("User", back_populates="favorites")

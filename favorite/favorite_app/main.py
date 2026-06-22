@@ -4,8 +4,12 @@ from contextlib import asynccontextmanager # 把异步函数变成"上下文管�
 
 from favorite_app.db.database import Base, engine # 数据库的"图纸(Base)"和"发动机(engine)"
 
+from favorite_app.api.favorite import router as favorite_router
 from fastapi.middleware.cors import CORSMiddleware
-
+# from favorite_app.models.user import User
+# from favorite_app.models.task import Task
+# from favorite_app.models.favorite import Favorite
+from favorite_app.models.result import Result
 from favorite_app.utils.exception import (
     http_exception_handler,
     global_exception_handler
@@ -63,7 +67,7 @@ app.add_exception_handler(
     global_exception_handler # 兜底处理函数
 )
 
-
+app.include_router(favorite_router)
 
 
 # 当有人访问网站的根地址 http://your-site.com/ 时

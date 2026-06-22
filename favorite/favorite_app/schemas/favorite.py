@@ -3,7 +3,6 @@ from favorite_app.schemas.task import TaskResponse
 
 
 class FavoriteCreate(BaseModel):
-    user_id: int
     task_id: int
 
 class FavoriteResponse(BaseModel):
@@ -23,3 +22,6 @@ class Favorite_to_Task(BaseModel):
 
     class Config:
         from_attributes = True
+
+class FavoriteCancel(BaseModel):
+    task_id: int

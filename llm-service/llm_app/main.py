@@ -2,13 +2,13 @@ import asyncio # Python自带的"异步任务调度器"
 from fastapi import FastAPI, HTTPException # FastAPI本体 + 内置的HTTP异常类
 from contextlib import asynccontextmanager # 把异步函数变成"上下文管理器"的工具
 
-from user_app.db.database import Base, engine # 数据库的"图纸(Base)"和"发动机(engine)"
-from user_app.api.user import router as user_router
-from user_app.api.task import router as task_router
-from user_app.api import upload
+from llm_app.db.database import Base, engine # 数据库的"图纸(Base)"和"发动机(engine)"
+from llm_app.api.report import router as report_router
+from llm_app.api.chat import router as chat_router
 from fastapi.middleware.cors import CORSMiddleware
-
-from user_app.utils.exception import (
+from llm_app.models.task import Task
+from llm_app.models.result import Result
+from llm_app.utils.exception import (
     http_exception_handler,
     global_exception_handler
 )
@@ -67,9 +67,8 @@ app.add_exception_handler(
 )
 
 
-app.include_router(user_router)
-app.include_router(task_router)
-app.include_router(upload.router)
+app.include_router(report_router)
+app.include_router(chat_router)
 
 # 当有人访问网站的根地址 http://your-site.com/ 时
 @app.get("/") # @ 是 Python 装饰器，表示"把下面的函数注册为 GET 接口"

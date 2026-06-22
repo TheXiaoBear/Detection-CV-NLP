@@ -10,10 +10,17 @@ class Report(Base, TimestampMixin):
 
     id = Column(Integer, primary_key=True)
 
-    task_id = Column(Integer)
+    title = Column(String(50))
 
-    report_type = Column(String(50))
+    task_id = Column(Integer,  ForeignKey("tasks.id"), unique=True)
+
+    report_type = Column(
+        String(50),
+        default="cv_report"
+    )
 
     content = Column(Text)
+
+    summary = Column(Text)
 
 

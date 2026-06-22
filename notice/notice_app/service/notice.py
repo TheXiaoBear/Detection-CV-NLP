@@ -9,8 +9,8 @@ from fastapi import HTTPException
 from notice_app.utils.page import PageMethod
 
 
-def notice_add(db: Session, notice: NoticeCreate):
-    return notice_repo.notice_add(db, notice)
+def notice_add(db: Session, user_id: int, notice: NoticeCreate):
+    return notice_repo.notice_add(db, user_id, notice)
 
 def notice_delete(db: Session, notice_id: int):
     return notice_repo.notice_delete(db, notice_id)
@@ -18,7 +18,7 @@ def notice_delete(db: Session, notice_id: int):
 def notice_update(db: Session, notice, id):
     return notice_repo.notice_update(db, notice, id)
 
-def favorite_search(
+def notice_search(
     title,
     user_id,
     page_num,
@@ -27,7 +27,7 @@ def favorite_search(
 ):
     skip = (page_num - 1) * page_size
 
-    return notice_repo.favorite_search(
+    return notice_repo.notice_search(
         db=db,
         user_id=user_id,
         title=title,

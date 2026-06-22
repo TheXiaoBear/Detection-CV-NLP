@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 import time
 import json
+from fastapi.responses import StreamingResponse
 
 app = FastAPI()
 
@@ -83,6 +84,26 @@ async def proxy(service: str, path: str, request: Request):
     headers.pop("content-length", None)
     headers.pop("connection", None)
     headers.pop("origin", None)
+
+    if service == "llm" and path == "chat/stream":
+
+        async def stream_generator():
+
+            async with httpx.AsyncClient(timeout=None) as client:
+                async with client.stream(
+                        method=request.method,
+                        url=target_url,
+                        headers=headers,
+                        params=request.query_params,
+                        content=body
+                ) as resp:
+                    async for chunk in resp.aiter_text():
+                        yield chunk
+
+        return StreamingResponse(
+            stream_generator(),
+            media_type="text/plain"
+        )
 
     async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
         resp = await client.request(

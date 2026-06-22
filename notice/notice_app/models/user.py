@@ -38,3 +38,8 @@ class User(Base, TimestampMixin):
         "Task",
         back_populates="user"
     )
+
+    favorites = relationship(
+        "Favorite",
+        back_populates="user"
+    )

@@ -16,6 +16,7 @@ from llm_app.schemas.chat import (
 from llm_app.services.chat_service import (
     ChatService
 )
+from fastapi.responses import StreamingResponse
 
 router = APIRouter(
     prefix="/chat",
@@ -70,3 +71,18 @@ def history(
         "message": "success",
         "data": messages
     }
+
+@router.post("/stream")
+def stream_chat(
+    request: ChatRequest,
+    db: Session = Depends(get_db)
+):
+
+    return StreamingResponse(
+        ChatService.stream_ask(
+            request.report_id,
+            request.question,
+            db
+        ),
+        media_type="text/plain"
+    )

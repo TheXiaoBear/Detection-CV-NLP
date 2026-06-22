@@ -17,17 +17,26 @@ client = OpenAI(
 class QwenClient:
 
     @staticmethod
-    def chat(prompt: str):
-
-        response = client.chat.completions.create(
-            model="qwen-plus",
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            temperature=0.7
+    def stream_chat(messages):
+        print("messages=")
+        print(messages)
+        response = (
+            client.chat.completions.create(
+                model="qwen-plus",
+                messages=messages,
+                stream=True
+            )
         )
 
-        return response.choices[0].message.content
+        for chunk in response:
+
+            if (
+                chunk.choices
+                and chunk.choices[0].delta.content
+            ):
+
+                yield (
+                    chunk
+                    .choices[0]
+                    .delta.content
+                )

@@ -3,8 +3,14 @@ from fastapi import FastAPI, HTTPException # FastAPI本体 + 内置的HTTP异常
 from contextlib import asynccontextmanager # 把异步函数变成"上下文管理器"的工具
 
 from notice_app.db.database import Base, engine # 数据库的"图纸(Base)"和"发动机(engine)"
+from notice_app.models.result import Result
+from notice_app.models.notice import Notice
+from notice_app.models.user import User
+from notice_app.models.favorite import Favorite
+
 from notice_app.api.notice import router as notice_router
 from fastapi.middleware.cors import CORSMiddleware
+
 
 from notice_app.utils.exception import (
     http_exception_handler,

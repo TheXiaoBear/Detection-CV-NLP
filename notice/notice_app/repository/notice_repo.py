@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+from openai.resources.skills import content
 from sqlalchemy.orm import Session, joinedload
 from sympy.parsing.sympy_parser import null
 
@@ -10,13 +11,15 @@ from datetime import datetime, UTC
 from notice_app.schemas.notice import NoticeCreate
 from notice_app.models.user import User
 
-def notice_add(db: Session, notice: NoticeCreate):
-    user_name = db.query(User).filter(User.id == notice.user_id).first().username
-    db.add(notice)
+def notice_add(db: Session, user_id: int, notice: NoticeCreate):
+    user_name = db.query(User).filter(User.id == user_id).first().username
+    notice_new = Notice(user_id=user_id, user_name=user_name,
+                        title=notice.title, content=notice.content)
+    db.add(notice_new)
 
     db.commit()
-    db.refresh(notice)
-    return notice
+    db.refresh(notice_new)
+    return notice_new
 
 def notice_delete(db: Session, notice_id: int):
     notice = db.query(Notice).filter(Notice.id == notice_id).first()
@@ -39,7 +42,7 @@ def notice_update(db: Session, notice: NoticeCreate, id: int):
     db.refresh(notice_now)
     return notice_now
 
-def favorite_search(
+def notice_search(
     db: Session,
     user_id: int,
     title: str | None,
@@ -56,9 +59,16 @@ def favorite_search(
             Task.title.like(f"%{title.strip()}%")
         )
 
-    return (
+    total = query.count()
+
+    records = (
         query
         .offset(skip)
         .limit(page_size)
         .all()
     )
+
+    return {
+        "totalRow": total,
+        "records": records
+    }

@@ -87,13 +87,18 @@ def report_search(
                 f"%{title.strip()}%"
             )
         )
+    total = query.count()
 
-    return (
+    records = (
         query
         .offset(skip)
         .limit(page_size)
         .all()
     )
+    return {
+        "totalRow": total,
+        "records": records
+    }
 
 def update_report(db: Session, report_id: int, report: ReportUpdate):
     result = db.query(Report).filter(Report.id == report_id).first()

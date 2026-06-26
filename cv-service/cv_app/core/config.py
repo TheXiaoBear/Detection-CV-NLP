@@ -7,7 +7,7 @@ MODEL_PATHS = {
 
     "yolov8n": BASE_DIR / "weights" / "yolov8n.pt",
 
-    "yolo11n": BASE_DIR / "weights" / "yolo11n.pt",
+    "yolov11n": BASE_DIR / "weights" / "yolov11n.pt",
 
     "yolov5su": BASE_DIR / "weights" / "yolov5su.pt",
 

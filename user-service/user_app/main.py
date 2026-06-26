@@ -2,7 +2,6 @@ import asyncio # Python自带的"异步任务调度器"
 from fastapi import FastAPI, HTTPException # FastAPI本体 + 内置的HTTP异常类
 from contextlib import asynccontextmanager # 把异步函数变成"上下文管理器"的工具
 
-
 from user_app.db.database import Base, engine # 数据库的"图纸(Base)"和"发动机(engine)"
 from user_app.models import favorite
 from user_app.api.user import router as user_router
@@ -15,9 +14,14 @@ from user_app.utils.exception import (
     global_exception_handler
 )
 
+from contextlib import asynccontextmanager
+from infra.nacos.registry import (
+    register_service,
+    unregister_service
+)
+
 # engine 是管道总公司，负责管理和数据库的物理连接。
 # Session 是一次办事的上下文，负责记录你要做什么（查哪张表、改哪条数据），最后通过 engine 的管道发命令给 MySQL
-
 
 # 启动/关闭时间机制
 # 这个装饰器把下面的函数变成一个 上下文管理器
@@ -30,8 +34,18 @@ async def lifespan(app: FastAPI):
     await asyncio.to_thread(Base.metadata.create_all, bind=engine)
     # Base.metadata.create_all(bind=engine)
 
+    await register_service(
+        "user-service",
+        8000
+    )
+
     # 交给 Python 的上下文管理器协议，表示"启动完毕，可以开始运行了"
     yield   # 分水岭 之前是启动 之后是关闭
+
+    await unregister_service(
+        "user-service",
+        8000
+    )
 
     # 关闭阶段可添加清理逻辑
     engine.dispose() # 关闭数据库连接池，释放资源

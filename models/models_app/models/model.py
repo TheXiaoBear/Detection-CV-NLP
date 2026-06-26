@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
-from favorite_app.db.database import Base
-from favorite_app.models.mixins import TimestampMixin
+from sqlalchemy import Column, Integer, String, ForeignKey, Text
+from models_app.db.database import Base
+from models_app.models.mixins import TimestampMixin
 from sqlalchemy.orm import relationship
 
 
@@ -9,6 +9,6 @@ class Model(Base, TimestampMixin):
 
     id = Column(Integer, primary_key=True)
 
-    model_name = Column(String)
+    model_name = Column(String(100))
 
-    description = Column(String)
+    description = Column(Text)

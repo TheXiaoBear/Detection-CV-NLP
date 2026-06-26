@@ -17,26 +17,55 @@ client = OpenAI(
 class QwenClient:
 
     @staticmethod
-    def stream_chat(messages):
-        print("messages=")
-        print(messages)
-        response = (
-            client.chat.completions.create(
-                model="qwen-plus",
-                messages=messages,
-                stream=True
-            )
+    def chat(messages):
+
+        if isinstance(messages, str):
+
+            messages = [
+                {
+                    "role": "user",
+                    "content": messages
+                }
+            ]
+
+        response = client.chat.completions.create(
+            model="qwen-plus",
+            messages=messages,
+            temperature=0.7
         )
 
+        return response.choices[0].message.content
+
+    @staticmethod
+    def stream_chat(messages):
+        print("==========进入路由==========")
+
+        if isinstance(messages, str):
+
+            messages = [
+                {
+                    "role": "user",
+                    "content": messages
+                }
+            ]
+
+        response = client.chat.completions.create(
+            model="qwen-plus",
+            messages=messages,
+            stream=True
+        )
+
+        print("==========开始调用Qwen==========")
         for chunk in response:
 
-            if (
-                chunk.choices
-                and chunk.choices[0].delta.content
-            ):
+            print("原始chunk:", chunk)
 
-                yield (
-                    chunk
-                    .choices[0]
-                    .delta.content
-                )
+            if (
+                    chunk.choices
+                    and chunk.choices[0].delta.content
+            ):
+                content = chunk.choices[0].delta.content
+
+                print("content:", repr(content))
+
+                yield content

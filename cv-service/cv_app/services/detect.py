@@ -32,9 +32,12 @@ def detection(
     # =========================
     # 2. 获取模型
     # =========================
+    print(model_name)
     model = ModelManager.switch_model(
         model_name
     )
+    if model is None:
+        raise Exception("Model not found")
 
     # =========================
     # 3. 模型推理

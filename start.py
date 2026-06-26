@@ -33,6 +33,8 @@ def run_service(name, cwd, command, color_code, delay=0):
     env = os.environ.copy()
     env["PYTHONIOENCODING"] = "utf-8"
 
+    env["PYTHONPATH"] = BASE_DIR
+
     process = subprocess.Popen(
         command,
         cwd=cwd,
@@ -78,7 +80,7 @@ def main():
         {
             "name": "gateway",
             "cwd": BASE_DIR,
-            "cmd": "uvicorn gateway.gateway:app --host 127.0.0.1 --port 8080 --reload",
+            "cmd": "uvicorn gateway.gateway:app --host 127.0.0.1 --port 9000 --reload",
             "color": "31",
             "delay": 0
         },
@@ -125,18 +127,25 @@ def main():
             "delay": 6
         },
         {
+            "name": "models",
+            "cwd": os.path.join(BASE_DIR, "models"),
+            "cmd": "python run.py",
+            "color": "40",
+            "delay": 7
+        },
+        {
             "name": "cv-worker",
             "cwd": os.path.join(BASE_DIR, "cv-service"),
             "cmd": "python -m cv_app.run_worker",
             "color": "94",
-            "delay": 7
+            "delay": 8
         },
         {
             "name": "nlp-worker",
             "cwd": os.path.join(BASE_DIR, "nlp-service"),
             "cmd": "python -m nlp_app.run_worker",
             "color": "95",
-            "delay": 8
+            "delay": 9
         },
     ]
 

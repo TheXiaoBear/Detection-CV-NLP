@@ -124,7 +124,7 @@ class ChatService:
         question: str,
         db: Session
     ):
-        print("进入 stream_ask")
+        print("==========进入 stream_ask==========")
 
         report = (
             db.query(Report)
@@ -185,26 +185,35 @@ class ChatService:
             else report.content[:2000]
         )
 
-        prompt = f"""
-你是一名计算机视觉专家。
+        messages = [
+            {
+                "role": "system",
+                "content": """
+        你是一名计算机视觉专家。
 
-报告摘要：
-{report_context}
+        请结合报告内容和知识库回答。
 
-知识库：
-{knowledge_text}
+        如果报告中没有相关证据，
+        请明确说明。
+        """
+            },
+            {
+                "role": "user",
+                "content": f"""
+        报告摘要：
+        {report_context}
 
-历史对话：
-{history_text}
+        知识库：
+        {knowledge_text}
 
-用户问题：
-{question}
+        历史对话：
+        {history_text}
 
-请结合报告内容和知识库回答。
-
-如果报告中没有相关证据，
-请明确说明。
-"""
+        用户问题：
+        {question}
+        """
+            }
+        ]
 
         full_answer = ""
 
@@ -212,7 +221,7 @@ class ChatService:
 
             print("开始调用大模型")
             # 如果 stream_chat 接收字符串
-            for chunk in QwenClient.stream_chat(prompt):
+            for chunk in QwenClient.stream_chat(messages):
 
                 if not chunk:
                     continue

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
-from user_app.db.database import Base
-from user_app.models.mixins import TimestampMixin
+from models_app.db.database import Base
+from models_app.models.mixins import TimestampMixin
 from sqlalchemy.orm import relationship
 
 class User(Base, TimestampMixin):
@@ -36,5 +36,10 @@ class User(Base, TimestampMixin):
     # 一个用户拥有多个任务
     tasks = relationship(
         "Task",
+        back_populates="user"
+    )
+
+    favorites = relationship(
+        "Favorite",
         back_populates="user"
     )

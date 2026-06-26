@@ -7,6 +7,10 @@ class ModelsResponse(BaseModel):
     description: str
 
 class ModelsCreate(BaseModel):
+    model_name: str
+    description: str
+
+class ModelsUpdate(BaseModel):
     id: int
     model_name: str
     description: str

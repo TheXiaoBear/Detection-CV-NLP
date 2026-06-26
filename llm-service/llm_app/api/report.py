@@ -53,14 +53,14 @@ def generate_report(
 # 查询报告
 @router.get("/generate")
 def report_search(db: Session = Depends(get_db),
-    # current_user = Depends(get_current_user),
+    current_user = Depends(get_current_user),
     page_num: int = 1,
     page_size: int = 10,
     title: str | None = None):
 
     data = report_service.report_search(
         db=db,
-        user_id=1,
+        user_id=current_user["user_id"],
         page_num=page_num,
         page_size=page_size,
         title=title

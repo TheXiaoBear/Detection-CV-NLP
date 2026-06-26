@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, Float
-from user_app.db.database import Base
-from user_app.models.mixins import TimestampMixin
+from models_app.db.database import Base
+from models_app.models.mixins import TimestampMixin
 from sqlalchemy.orm import relationship
 
 
@@ -17,6 +17,7 @@ class Task(Base, TimestampMixin):
     image_path = Column(String(255))
 
     description = Column(Text)
+
     confidence = Column(Float)
 
     status = Column(String(50), index=True, nullable=False)
@@ -26,7 +27,9 @@ class Task(Base, TimestampMixin):
     heatmap_image = Column(String(500))
 
     cv_model = Column(String(50))
+    cv_duration = Column(Float)
     nlp_model = Column(String(50))
+    nlp_duration = Column(Float)
 
     user = relationship("User",
                         back_populates="tasks")
@@ -35,7 +38,4 @@ class Task(Base, TimestampMixin):
     results = relationship("Result",
                            back_populates="task")
 
-    favorites = relationship(
-        "Favorite",
-        back_populates="task"
-    )
+    favorites = relationship("Favorite", back_populates="task")

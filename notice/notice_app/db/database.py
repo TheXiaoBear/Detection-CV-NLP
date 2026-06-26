@@ -1,11 +1,20 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-
+from infra.nacos.settings import settings
 # 先找环境变量，没有就用默认值
-DATABASE_URL = os.getenv(
-    "DATABASE_URL", # 先从系统的环境变量里找这个钥匙
-    "mysql+pymysql://root:123456@localhost:3306/target" # 找不到就用这个默认备用钥匙
+# DATABASE_URL = os.getenv(
+#     "DATABASE_URL", # 先从系统的环境变量里找这个钥匙
+#     "mysql+pymysql://root:123456@localhost:3306/target" # 找不到就用这个默认备用钥匙
+# )
+
+DATABASE_URL = (
+    f"mysql+pymysql://"
+    f"{settings.MYSQL_USER}:"
+    f"{settings.MYSQL_PASSWORD}@"
+    f"{settings.MYSQL_HOST}:"
+    f"{settings.MYSQL_PORT}/"
+    f"{settings.MYSQL_DB}"
 )
 
 engine = create_engine(

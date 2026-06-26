@@ -54,4 +54,4 @@ def favorite_list(
 def favorite_cancel(data: FavoriteCancel, db: Session = Depends(get_db),
                     current_user = Depends(get_current_user),
                     ):
-    data = favorite_service.favorite_cancel(db=db, user_id=current_user.id, task_id=data.task_id)
+    data = favorite_service.favorite_cancel(db=db, user_id=current_user["user_id"], task_id=data.task_id)

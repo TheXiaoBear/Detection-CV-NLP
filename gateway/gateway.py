@@ -5,6 +5,8 @@ import httpx
 import time
 import json
 from fastapi.responses import StreamingResponse
+from infra.nacos.discovery import discover
+
 
 app = FastAPI()
 
@@ -26,13 +28,13 @@ app.add_middleware(
 # =========================
 # SERVICES
 # =========================
-SERVICES = {
-    "user-service": "http://127.0.0.1:8000",
-    "favorite": "http://127.0.0.1:8004",
-    "notice": "http://127.0.0.1:8005",
-    "models": "http://127.0.0.1:8006",
-    "llm": "http://127.0.0.1:8003",
-}
+# SERVICES = {
+#     "user-service": "http://127.0.0.1:8000",
+#     "favorite": "http://127.0.0.1:8004",
+#     "notice": "http://127.0.0.1:8005",
+#     "models": "http://127.0.0.1:8006",
+#     "llm": "http://127.0.0.1:8003",
+# }
 
 # =========================
 # OPTIONS DEBUG
@@ -70,11 +72,24 @@ async def proxy(service: str, path: str, request: Request):
     print("path:", path)
     print("raw url:", str(request.url))
 
-    if service not in SERVICES:
-        raise HTTPException(status_code=404)
+    # if service not in SERVICES:
+    #     raise HTTPException(status_code=404)
+    #
+    # # 前缀只作为识别，不作为url的一部分
+    # target_url = f"{SERVICES[service]}/{path}"
 
-    # 前缀只作为识别，不作为url的一部分
-    target_url = f"{SERVICES[service]}/{path}"
+    try:
+        instance = await discover(service)
+
+    except Exception:
+        raise HTTPException(
+            status_code=404,
+            detail=f"服务 {service} 不存在"
+        )
+
+    target_url = (
+        f"http://{instance.ip}:{instance.port}/{path}"
+    )
     print("target_url:", target_url)
 
     body = await request.body()
@@ -87,18 +102,32 @@ async def proxy(service: str, path: str, request: Request):
 
     if service == "llm" and path == "chat/stream":
 
+        client = httpx.AsyncClient(timeout=None)
+
         async def stream_generator():
 
-            async with httpx.AsyncClient(timeout=None) as client:
-                async with client.stream(
-                        method=request.method,
-                        url=target_url,
-                        headers=headers,
-                        params=request.query_params,
-                        content=body
-                ) as resp:
-                    async for chunk in resp.aiter_text():
-                        yield chunk
+            try:
+
+                req = client.build_request(
+                    request.method,
+                    target_url,
+                    headers=headers,
+                    params=request.query_params,
+                    content=body
+                )
+
+                resp = await client.send(
+                    req,
+                    stream=True
+                )
+
+                async for chunk in resp.aiter_text():
+                    yield chunk
+
+            finally:
+
+                await resp.aclose()
+                await client.aclose()
 
         return StreamingResponse(
             stream_generator(),

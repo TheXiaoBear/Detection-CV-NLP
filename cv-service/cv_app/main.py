@@ -8,6 +8,11 @@ from cv_app.api.detect import router as detect_router
 
 from fastapi.middleware.cors import CORSMiddleware
 
+from contextlib import asynccontextmanager
+from infra.nacos.registry import (
+    register_service,
+    unregister_service
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -17,7 +22,17 @@ async def lifespan(app: FastAPI):
         bind=engine
     )
 
+    await register_service(
+        "cv-service",
+        8001
+    )
+
     yield
+
+    await unregister_service(
+        "cv-service",
+        8001
+    )
 
     engine.dispose()
 

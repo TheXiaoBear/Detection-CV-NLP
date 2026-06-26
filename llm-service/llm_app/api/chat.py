@@ -72,17 +72,38 @@ def history(
         "data": messages
     }
 
+# @router.post("/stream")
+# def stream_chat(
+#     request: ChatRequest,
+#     db: Session = Depends(get_db)
+# ):
+    # print("进入 /chat/stream")
+    # return StreamingResponse(
+    #     ChatService.stream_ask(
+    #         request.report_id,
+    #         request.question,
+    #         db
+    #     ),
+    #     media_type="text/plain"
+    # )
 @router.post("/stream")
 def stream_chat(
     request: ChatRequest,
     db: Session = Depends(get_db)
 ):
 
+    print("进入/chat/stream")
+
+    gen = ChatService.stream_ask(
+        request.report_id,
+        request.question,
+        db
+    )
+
+    print(gen)
+    print(type(gen))
+
     return StreamingResponse(
-        ChatService.stream_ask(
-            request.report_id,
-            request.question,
-            db
-        ),
+        gen,
         media_type="text/plain"
     )

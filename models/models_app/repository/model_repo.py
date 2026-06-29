@@ -80,39 +80,36 @@ def activate_model(db: Session, id: int):
     return None
 
 def get_model_list(db: Session):
-
     cache = redis_client.get("model:list")
-
     if cache:
         return json.loads(cache)
 
     data = (
         db.query(Model)
         .filter(Model.deleted_at == None)
-
     )
 
     total = data.count()
-    records = (
-        data
-    )
+    records = data.all()  # ✅ 执行查询，获取 ORM 对象列表
 
-    result = [
+    serialized_records = [
         {
             "id": item.id,
             "model_name": item.model_name,
             "description": item.description
         }
-        for item in data
+        for item in records
     ]
+
+    result = {
+        "totalRow": total,
+        "records": serialized_records
+    }
 
     redis_client.set(
         "model:list",
-        json.dumps(result),
+        json.dumps(result, default=str),
         ex=3600
     )
 
-    return {
-        "totalRow": total,
-        "records": records
-    }
+    return result

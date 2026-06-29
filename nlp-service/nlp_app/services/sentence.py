@@ -376,40 +376,41 @@ def generate_description(
         for result in results
     }
 
-    if len(unique_labels) == 1:
+    duration = 0.0
+    scene_confidence = 0.0
 
-        result = results[0]
+    if len(unique_labels) <= 1:
 
-        generated_text = generate_single_description(
-            model,
-            tokenizer,
-            result.label,
-            result.confidence
+        generated_text = "目标类别数量不足，跳过场景识别"
+
+        print(
+            f"[TextCNN] task={task_id} "
+            f"目标类别数量不足，跳过场景识别"
         )
-
 
     else:
 
         scene_result = predict_scene(results)
-        duration = float(scene_result['duration'])
+
+        duration = float(
+            scene_result["duration"]
+        )
+
+        scene_confidence = float(
+            scene_result["confidence"]
+        )
 
         generated_text = (
-
             f"识别场景：{scene_result['scene_cn']}"
-
-            f"（置信度：{scene_result['confidence'] * 100:.2f}%）"
-
+            f"（置信度：{scene_confidence * 100:.2f}%）"
         )
 
         print(
-
             f"[TextCNN] "
-
             f"scene={scene_result['scene_cn']} "
-
-            f"confidence={scene_result['confidence']:.4f}"
-
+            f"confidence={scene_confidence:.4f}"
         )
+
     # =========================
     # 8. 更新 task.description
     # =========================
@@ -417,7 +418,7 @@ def generate_description(
     task.status = "NLP_success"
     task.nlp_duration = round(duration, 4)
     task.nlp_model = "TextCNN"
-    task.confidence = round(scene_result['confidence'], 4)
+    task.confidence = round(scene_confidence, 4)
     redis_client.set(
         cache_key,
         generated_text,

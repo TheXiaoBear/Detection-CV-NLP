@@ -38,11 +38,18 @@ def get_post(
         db: Session,
         post_id: int
 ):
-
-    post = post_repo.get_by_id(
+    row = post_repo.get_new_detail(
         db,
         post_id
     )
+
+    if not row:
+        raise HTTPException(
+            404,
+            "帖子不存在"
+        )
+
+    post, username, avatar = row
 
     if not post:
         raise HTTPException(
@@ -56,7 +63,35 @@ def get_post(
 
     db.refresh(post)
 
-    return post
+    return {
+
+        "id": post.id,
+
+        "title": post.title,
+
+        "content": post.content,
+
+        "user_id": post.user_id,
+
+        "view_count": post.view_count,
+
+        "like_count": post.like_count,
+
+        "comment_count": post.comment_count,
+
+        "created_at": post.created_at,
+
+        "author": {
+
+            "id": post.user_id,
+
+            "username": username,
+
+            "avatar": avatar
+
+        }
+
+    }
 
 def update_post(
         db: Session,
@@ -141,13 +176,40 @@ def get_posts(
 
     total = query.count()
 
-    records = (
+    rows = (
         query
         .order_by(Post.id.desc())
         .offset(skip)
         .limit(page_size)
         .all()
     )
+
+    records = []
+
+    for post, username, avatar in rows:
+        records.append({
+
+            "id": post.id,
+
+            "title": post.title,
+
+            "content": post.content,
+
+            "user_id": post.user_id,
+
+            "view_count": post.view_count,
+
+            "like_count": post.like_count,
+
+            "comment_count": post.comment_count,
+
+            "created_at": post.created_at,
+
+            "username": username,
+
+            "avatar": avatar
+
+        })
 
     return {
         "records": records,
@@ -172,12 +234,39 @@ def search_post(
 
     total = query.count()
 
-    records = (
+    rows = (
         query
         .offset(skip)
         .limit(page_size)
         .all()
     )
+
+    records = []
+
+    for post, username, avatar in rows:
+        records.append({
+
+            "id": post.id,
+
+            "title": post.title,
+
+            "content": post.content,
+
+            "user_id": post.user_id,
+
+            "view_count": post.view_count,
+
+            "like_count": post.like_count,
+
+            "comment_count": post.comment_count,
+
+            "created_at": post.created_at,
+
+            "username": username,
+
+            "avatar": avatar
+
+        })
 
     return {
         "records": records,
@@ -202,12 +291,39 @@ def my_posts(
 
     total = query.count()
 
-    records = (
+    rows = (
         query
         .offset(skip)
         .limit(page_size)
         .all()
     )
+
+    records = []
+
+    for post, username, avatar in rows:
+        records.append({
+
+            "id": post.id,
+
+            "title": post.title,
+
+            "content": post.content,
+
+            "user_id": post.user_id,
+
+            "view_count": post.view_count,
+
+            "like_count": post.like_count,
+
+            "comment_count": post.comment_count,
+
+            "created_at": post.created_at,
+
+            "username": username,
+
+            "avatar": avatar
+
+        })
 
     return {
         "records": records,

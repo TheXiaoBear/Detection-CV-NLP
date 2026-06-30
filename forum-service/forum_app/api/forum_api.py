@@ -128,7 +128,7 @@ def list_posts(
     )
 
 # 搜索帖子
-@router.get("/posts/search")
+@router.get("/posts_search")
 def search_post(
         keyword: str,
         page_num: int = 1,

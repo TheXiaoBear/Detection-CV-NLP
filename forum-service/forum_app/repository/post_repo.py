@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from forum_app.models.post import Post
-
+from forum_app.models.user import User
 
 # 新建帖子
 def create(
@@ -27,13 +27,42 @@ def get_by_id(
         .first()
     )
 
+def get_new_detail(
+        db: Session,
+        post_id: int
+):
+    return (
+        db.query(
+            Post,
+            User.username,
+            User.avatar
+        )
+        .join(
+            User,
+            User.id == Post.user_id
+        )
+        .filter(
+            Post.id == post_id,
+            Post.deleted_at.is_(None)
+        )
+        .first()
+    )
+
 
 # 获取所有帖子
 def get_all(
         db: Session
 ):
     return (
-        db.query(Post)
+        db.query(
+            Post,
+            User.username,
+            User.avatar
+        )
+        .join(
+            User,
+            User.id == Post.user_id
+        )
         .filter(
             Post.deleted_at.is_(None)
         )
@@ -46,9 +75,19 @@ def search(
         keyword: str
 ):
     return (
-        db.query(Post)
+        db.query(
+            Post,
+            User.username,
+            User.avatar
+        )
+        .join(
+            User,
+            User.id == Post.user_id
+        )
         .filter(
-            Post.title.like(f"%{keyword}%"),
+            Post.title.like(
+                f"%{keyword}%"
+            ),
             Post.deleted_at.is_(None)
         )
     )
@@ -60,7 +99,15 @@ def get_by_user_id(
         user_id: int
 ):
     return (
-        db.query(Post)
+        db.query(
+            Post,
+            User.username,
+            User.avatar
+        )
+        .join(
+            User,
+            User.id == Post.user_id
+        )
         .filter(
             Post.user_id == user_id,
             Post.deleted_at.is_(None)

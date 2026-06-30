@@ -134,18 +134,25 @@ def main():
             "delay": 7
         },
         {
+            "name": "forum-service",
+            "cwd": os.path.join(BASE_DIR, "forum-service"),
+            "cmd": "python run.py",
+            "color": "37",
+            "delay": 8
+        },
+        {
             "name": "cv-worker",
             "cwd": os.path.join(BASE_DIR, "cv-service"),
             "cmd": "python -m cv_app.run_worker",
             "color": "94",
-            "delay": 8
+            "delay": 9
         },
         {
             "name": "nlp-worker",
             "cwd": os.path.join(BASE_DIR, "nlp-service"),
             "cmd": "python -m nlp_app.run_worker",
             "color": "95",
-            "delay": 9
+            "delay": 10
         },
     ]
 

@@ -68,12 +68,33 @@ def get_comments(
 
     total = query.count()
 
-    records = (
+    rows = (
         query
         .offset(skip)
         .limit(page_size)
         .all()
     )
+
+    records = []
+
+    for comment, username, avatar in rows:
+        records.append({
+
+            "id": comment.id,
+
+            "post_id": comment.post_id,
+
+            "user_id": comment.user_id,
+
+            "content": comment.content,
+
+            "created_at": comment.created_at,
+
+            "username": username,
+
+            "avatar": avatar
+
+        })
 
     return {
         "records": records,

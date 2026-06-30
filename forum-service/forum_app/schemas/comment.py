@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-
+from datetime import datetime
 
 class CommentCreate(BaseModel):
 
@@ -20,6 +20,12 @@ class CommentResponse(BaseModel):
     user_id: int
 
     content: str
+
+    username: str
+
+    avatar: str
+
+    created_at: datetime
 
     class Config:
         from_attributes = True

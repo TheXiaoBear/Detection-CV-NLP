@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 
 from forum_app.models.comment import Comment
+from forum_app.models.user import User
 
 
 # 创建评论
@@ -15,11 +16,19 @@ def create(
 
 # 查询帖子评论
 def get_post_comments(
-        db: Session,
-        post_id: int
+    db: Session,
+    post_id: int
 ):
     return (
-        db.query(Comment)
+        db.query(
+            Comment,
+            User.username,
+            User.avatar
+        )
+        .join(
+            User,
+            User.id == Comment.user_id
+        )
         .filter(
             Comment.post_id == post_id,
             Comment.deleted_at.is_(None)

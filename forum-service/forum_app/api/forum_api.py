@@ -23,9 +23,14 @@ from forum_app.schemas.comment import (
 )
 
 from forum_app.services import (
+    message_service
+)
+
+from forum_app.services import (
     post_service,
     comment_service,
-    like_service
+    like_service,
+    favorite_post
 )
 
 router = APIRouter()
@@ -54,12 +59,16 @@ def create_post(
 @router.get("/posts/{post_id}")
 def get_post(
         post_id: int,
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
+        current_user=Depends(
+            get_current_user
+        )
 ):
 
     result = post_service.get_post(
         db,
-        post_id
+        post_id,
+        current_user["user_id"]
     )
 
     return ResponseUtil.success(
@@ -228,4 +237,153 @@ def toggle_like(
 
     return ResponseUtil.success(
         data=result
+    )
+
+@router.post(
+    "/posts/{post_id}/favorite"
+)
+def toggle_favorite(
+        post_id: int,
+        db: Session = Depends(get_db),
+        current_user=Depends(
+            get_current_user
+        )
+):
+
+    result = (
+        favorite_post
+        .toggle_favorite(
+            db,
+            current_user["user_id"],
+            post_id
+        )
+    )
+
+    return ResponseUtil.success(
+        data=result
+    )
+
+@router.get("/my/favorites")
+def my_favorites(
+        page_num: int = 1,
+        page_size: int = 10,
+        db: Session = Depends(get_db),
+        current_user=Depends(
+            get_current_user
+        )
+):
+
+    result = (
+        favorite_post.my_favorites(
+            db,
+            current_user["user_id"],
+            page_num,
+            page_size
+        )
+    )
+
+    return ResponseUtil.success(
+        data=result
+    )
+
+@router.get("/my/favorites")
+def my_favorites(
+        page_num: int = 1,
+        page_size: int = 10,
+        db: Session = Depends(get_db),
+        current_user=Depends(
+            get_current_user
+        )
+):
+
+    result = (
+        favorite_post.my_favorites(
+            db,
+            current_user["user_id"],
+            page_num,
+            page_size
+        )
+    )
+
+    return ResponseUtil.success(
+        data=result
+    )
+
+@router.get("/messages")
+def my_messages(
+        page_num: int = 1,
+        page_size: int = 10,
+        db: Session = Depends(get_db),
+        current_user=Depends(
+            get_current_user
+        )
+):
+
+    result = (
+        message_service.my_messages(
+            db,
+            current_user["user_id"],
+            page_num,
+            page_size
+        )
+    )
+
+    return ResponseUtil.success(
+        data=result
+    )
+
+@router.put(
+    "/messages/{message_id}/read"
+)
+def read_message(
+        message_id: int,
+        db: Session = Depends(get_db),
+        current_user=Depends(
+            get_current_user
+        )
+):
+
+    result = (
+        message_service.read_message(
+            db,
+            current_user["user_id"],
+            message_id
+        )
+    )
+
+    return ResponseUtil.success(
+        data=result
+    )
+
+@router.get("/messages/unread/count")
+def unread_count(
+        db: Session = Depends(get_db),
+        current_user=Depends(
+            get_current_user
+        )
+):
+
+    return ResponseUtil.success(
+        data=
+        message_service.unread_count(
+            db,
+            current_user["user_id"]
+        )
+    )
+
+@router.put("/messages/read/all")
+def read_all_messages(
+        db: Session = Depends(get_db),
+        current_user=Depends(
+            get_current_user
+        )
+):
+
+    message_service.read_all_messages(
+        db,
+        current_user["user_id"]
+    )
+
+    return ResponseUtil.success(
+        message="全部已读"
     )

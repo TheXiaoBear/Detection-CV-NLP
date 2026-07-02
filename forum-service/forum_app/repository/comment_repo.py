@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 
 from forum_app.models.comment import Comment
 from forum_app.models.user import User
@@ -19,11 +19,17 @@ def get_post_comments(
     db: Session,
     post_id: int
 ):
+    ReplyUser = aliased(User)
     return (
         db.query(
             Comment,
             User.username,
-            User.avatar
+            User.avatar,
+            ReplyUser.username
+        )
+        .outerjoin(
+            ReplyUser,
+            ReplyUser.id == Comment.reply_user_id
         )
         .join(
             User,

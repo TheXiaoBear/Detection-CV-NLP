@@ -5,9 +5,12 @@ from forum_app.models.comment import Comment
 
 from forum_app.repository import (
     comment_repo,
-    post_repo
+    post_repo,
+    user_repo
 )
-
+from forum_app.services import (
+    message_service
+)
 from forum_app.schemas.comment import (
     CommentCreate
 )
@@ -30,10 +33,59 @@ def create_comment(
             "帖子不存在"
         )
 
+    current_user = (
+        user_repo.get_by_id(
+            db,
+            user_id
+        )
+    )
+
+    content = (
+        comment_in.content[:30] + "..."
+        if len(comment_in.content) > 30
+        else comment_in.content
+    )
+
+    reply_user_id = None
+    parent_comment = None
+
+    # =====================
+    # 回复评论
+    # =====================
+    if comment_in.parent_id:
+
+        parent_comment = (
+            comment_repo.get_by_id(
+                db,
+                comment_in.parent_id
+            )
+        )
+
+        if not parent_comment:
+            raise HTTPException(
+                404,
+                "评论不存在"
+            )
+
+        if parent_comment.post_id != post.id:
+            raise HTTPException(
+                400,
+                "评论数据异常"
+            )
+
+        reply_user_id = (
+            parent_comment.user_id
+        )
+
+    # =====================
+    # 创建评论
+    # =====================
     comment = Comment(
         post_id=comment_in.post_id,
         user_id=user_id,
-        content=comment_in.content
+        content=comment_in.content,
+        parent_id=comment_in.parent_id,
+        reply_user_id=reply_user_id
     )
 
     comment_repo.create(
@@ -41,6 +93,46 @@ def create_comment(
         comment
     )
 
+    # 提前获取comment.id
+    db.flush()
+
+    # =====================
+    # 回复通知
+    # =====================
+    if parent_comment:
+
+        if parent_comment.user_id != user_id:
+
+            message_service.create_message(
+                db,
+                parent_comment.user_id,
+                "收到回复",
+                f"{current_user.username} 回复了你的评论：{content}",
+                "reply",
+                post.id,
+                comment.id,
+                parent_comment.id
+            )
+
+    # =====================
+    # 评论帖子通知
+    # =====================
+    else:
+
+        if post.user_id != user_id:
+
+            message_service.create_message(
+                db,
+                post.user_id,
+                "帖子收到评论",
+                f"{current_user.username} 评论了你的帖子《{post.title}》：{content}",
+                "comment",
+                post.id
+            )
+
+    # =====================
+    # 更新统计
+    # =====================
     post.comment_count += 1
 
     db.commit()
@@ -48,7 +140,6 @@ def create_comment(
     db.refresh(comment)
 
     return comment
-
 
 def get_comments(
         db: Session,
@@ -77,7 +168,7 @@ def get_comments(
 
     records = []
 
-    for comment, username, avatar in rows:
+    for comment, username, avatar, reply_username  in rows:
         records.append({
 
             "id": comment.id,
@@ -86,13 +177,18 @@ def get_comments(
 
             "user_id": comment.user_id,
 
+            "parent_id": comment.parent_id,
+
+            "reply_user_id": comment.reply_user_id,
+
             "content": comment.content,
 
             "created_at": comment.created_at,
 
             "username": username,
 
-            "avatar": avatar
+            "avatar": avatar,
+            "reply_username": reply_username
 
         })
 

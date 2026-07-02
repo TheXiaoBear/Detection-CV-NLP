@@ -33,6 +33,12 @@ class Post(Base, TimestampMixin):
         nullable=False
     )
 
+    favorite_count = Column(
+        Integer,
+        nullable=False,
+        default=0
+    )
+
     view_count = Column(
         Integer,
         default=0

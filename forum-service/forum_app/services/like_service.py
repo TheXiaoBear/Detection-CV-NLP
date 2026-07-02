@@ -5,9 +5,12 @@ from forum_app.models.post_like import PostLike
 
 from forum_app.repository import (
     like_repo,
-    post_repo
+    post_repo,
+    user_repo
 )
-
+from forum_app.services import (
+    message_service
+)
 
 def toggle_like(
         db: Session,
@@ -61,6 +64,23 @@ def toggle_like(
     )
 
     post.like_count += 1
+
+    if post.user_id != user_id:
+        current_user = (
+            user_repo.get_by_id(
+                db,
+                user_id
+            )
+        )
+
+        message_service.create_message(
+            db,
+            post.user_id,
+            "帖子收到点赞",
+            f"{current_user.username} 点赞了你的帖子《{post.title}》",
+            "like",
+            post.id
+        )
 
     db.commit()
 

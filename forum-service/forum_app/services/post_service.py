@@ -9,6 +9,10 @@ from forum_app.schemas.post import (
     PostCreate,
     PostUpdate
 )
+from forum_app.repository import (
+    like_repo,
+    favorite_repo
+)
 
 
 def create_post(
@@ -36,12 +40,29 @@ def create_post(
 
 def get_post(
         db: Session,
-        post_id: int
+        post_id: int,
+        user_id=None
 ):
     row = post_repo.get_new_detail(
         db,
         post_id
     )
+
+    liked = False
+    favorited = False
+
+    if user_id:
+        liked = like_repo.is_liked(
+            db,
+            user_id,
+            post_id
+        )
+
+        favorited = favorite_repo.is_favorited(
+            db,
+            user_id,
+            post_id
+        )
 
     if not row:
         raise HTTPException(
@@ -80,6 +101,10 @@ def get_post(
         "comment_count": post.comment_count,
 
         "created_at": post.created_at,
+
+        "liked": liked,
+
+        "favorited": favorited,
 
         "author": {
 

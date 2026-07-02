@@ -42,7 +42,6 @@ def notice_get(db: Session = Depends(get_db),
 
     data = notice_service.notice_search(
         db=db,
-        user_id=current_user["user_id"],
         page_num=page_num,
         page_size=page_size,
         title=title

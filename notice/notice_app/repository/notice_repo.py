@@ -44,14 +44,12 @@ def notice_update(db: Session, notice: NoticeCreate, id: int):
 
 def notice_search(
     db: Session,
-    user_id: int,
     title: str | None,
     skip: int,
     page_size: int
 ):
     query = (
         db.query(Notice)
-        .filter(Notice.user_id == user_id)
     )
 
     if title:

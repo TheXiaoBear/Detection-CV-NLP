@@ -33,3 +33,17 @@ class Comment(Base, TimestampMixin):
         Text,
         nullable=False
     )
+
+    # 父评论ID
+    parent_id = Column(
+        Integer,
+        nullable=True,
+        index=True
+    )
+
+    # 回复谁
+    reply_user_id = Column(
+        Integer,
+        nullable=True,
+        index=True
+    )

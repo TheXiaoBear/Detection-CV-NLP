@@ -35,3 +35,18 @@ def delete(
         like: PostLike
 ):
     db.delete(like)
+
+def is_liked(
+        db: Session,
+        user_id: int,
+        post_id: int
+):
+    return (
+        db.query(PostLike)
+        .filter(
+            PostLike.user_id == user_id,
+            PostLike.post_id == post_id
+        )
+        .first()
+        is not None
+    )

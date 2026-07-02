@@ -20,7 +20,6 @@ def notice_update(db: Session, notice, id):
 
 def notice_search(
     title,
-    user_id,
     page_num,
     page_size,
     db: Session
@@ -29,7 +28,6 @@ def notice_search(
 
     return notice_repo.notice_search(
         db=db,
-        user_id=user_id,
         title=title,
         skip=skip,
         page_size=page_size
